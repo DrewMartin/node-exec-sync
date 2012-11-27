@@ -26,18 +26,13 @@ getOutput = (path) ->
     return output
 
 # execSync implementation
-module.exports = (cmd, returnOutAndErr = false) ->
+module.exports = (cmd) ->
     id = uniqId()
     stdout = id+'.stdout'
     stderr = id+'.stderr'
     dir = tmpDir()
     cmd = "#{cmd} > #{dir}/#{stdout} 2> #{dir}/#{stderr}"
-    libc.system cmd
+    status = libc.system cmd
     result = getOutput "#{dir}/#{stdout}"
     error = getOutput "#{dir}/#{stderr}"
-    if (returnOutAndErr)
-        return { stdout: result, stderr: error }
-    else
-        if error != ''
-            throw new Error(error)
-        return result
+    return { status: status, stdout: result, stderr: error }
