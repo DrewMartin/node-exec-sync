@@ -44,20 +44,30 @@
     return output;
   };
 
-  module.exports = function(cmd) {
+  module.exports = function(cmd, noRedirect) {
     var dir, error, id, result, status, stderr, stdout;
+    if (noRedirect == null) {
+      noRedirect = false;
+    }
     id = uniqId();
-    stdout = id + '.stdout';
-    stderr = id + '.stderr';
-    dir = tmpDir();
-    cmd = "" + cmd + " > " + dir + "/" + stdout + " 2> " + dir + "/" + stderr;
+    if (!noRedirect) {
+      stdout = id + '.stdout';
+      stderr = id + '.stderr';
+      dir = tmpDir();
+      cmd = "" + cmd + " > " + dir + "/" + stdout + " 2> " + dir + "/" + stderr;
+    }
     status = libc.system(cmd);
-    result = getOutput("" + dir + "/" + stdout);
-    error = getOutput("" + dir + "/" + stderr);
+    if (!noRedirect) {
+      result = getOutput("" + dir + "/" + stdout);
+      error = getOutput("" + dir + "/" + stderr);
+      return {
+        status: status,
+        stdout: result,
+        stderr: error
+      };
+    }
     return {
-      status: status,
-      stdout: result,
-      stderr: error
+      status: status
     };
   };
 
